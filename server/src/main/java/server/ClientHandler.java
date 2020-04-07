@@ -90,15 +90,30 @@ public class ClientHandler {
                                     server.privateMsg(this, token[1], token[2]);
                                 }
                             }
+                            if (str.startsWith("/chnick ")) {
+                                String[] token = str.split(" ", 2);
+                                if (token[1].contains(" ")) {
+                                    sendMsg("Ник не может содержать пробелов");
+                                    continue;
+                                }
+                                if (server.getAuthService().changeNick(this.nick, token[1])) {
+                                    sendMsg("/yournickis " + token[1]);
+                                    sendMsg("Ваш ник изменен на " + token[1]);
+                                    this.nick = token[1];
+                                    server.broadcastClientList();
+                                } else {
+                                    sendMsg("Не удалось изменить ник. Ник " + token[1] + " уже существует");
+                                }
+                            }
 
                         } else {
                             server.broadcastMsg(nick, str);
                         }
                     }
+                } catch (SocketTimeoutException e){
+                    System.out.println("Клиент отключился по таймауту!");
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
-                } catch (SocketTimeoutException e){
-                    System.out.println("2 минуты истекло. Соединение разорвано!");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
